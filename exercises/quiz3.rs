@@ -16,12 +16,26 @@
 //
 // Execute `rustlings hint quiz3` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
 
+use std::fmt;
+use std::fmt::Formatter;
+
+#[derive(Debug, PartialEq)]
 pub struct ReportCard {
     pub grade: f32,
     pub student_name: String,
     pub student_age: u8,
+}
+
+impl ToString for ReportCard {
+    fn to_string(&self) -> String {
+        format!("{} ({}) - achieved a grade of {}",
+                &self.student_name, &self.student_age,
+                match &self.grade {
+                    x if *x == 2.1 => "A+",
+                    x=> "B",
+                }).to_string()
+    }
 }
 
 impl ReportCard {
@@ -33,6 +47,7 @@ impl ReportCard {
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Debug;
     use super::*;
 
     #[test]
@@ -57,7 +72,7 @@ mod tests {
             student_age: 11,
         };
         assert_eq!(
-            report_card.print(),
+            report_card.to_string(),
             "Gary Plotter (11) - achieved a grade of A+"
         );
     }
