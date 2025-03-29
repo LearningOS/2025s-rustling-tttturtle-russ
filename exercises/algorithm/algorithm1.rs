@@ -2,9 +2,10 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
+use std::io::ErrorKind::Unsupported;
 use std::ptr::NonNull;
 use std::vec::*;
 
@@ -21,6 +22,7 @@ impl<T> Node<T> {
             next: None,
         }
     }
+
 }
 #[derive(Debug)]
 struct LinkedList<T> {
@@ -31,11 +33,15 @@ struct LinkedList<T> {
 
 impl<T> Default for LinkedList<T> {
     fn default() -> Self {
-        Self::new()
+        Self {
+            length: 0,
+            start: None,
+            end: None,
+        }
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,14 +75,47 @@ impl<T> LinkedList<T> {
             },
         }
     }
+
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		if list_a.length == 0 {
+            return list_b;
         }
+        if list_b.length == 0 {
+            return list_b;
+        }
+        let mut result: Self = Default::default();
+        let mut node_a = list_a.start;
+        let mut node_b = list_b.start;
+        let mut total_len = list_a.length + list_b.length;
+        result.length = total_len;
+        while total_len != 0 {
+            match (node_a, node_b) {
+                (Some(val_a), Some(val_b)) => unsafe {
+                    let a = (*val_a.as_ptr()).val.clone();
+                    let b = (*val_b.as_ptr()).val.clone();
+                    if a < b {
+                        result.add(a);
+                        node_a = (*val_a.as_ptr()).next;
+                    }else {
+                        result.add(b);
+                        node_b = (*val_b.as_ptr()).next;
+                    }
+                },
+                (Some(val_a), None) => unsafe {
+                    let a = (*val_a.as_ptr()).val.clone();
+                    result.add(a);
+                    node_a = (*val_a.as_ptr()).next;
+                },
+                (None, Some(val_b)) => unsafe {
+                    let b = (*val_b.as_ptr()).val.clone();
+                    result.add(b);
+                    node_b = (*val_b.as_ptr()).next;
+                },
+                (None, None) => break,
+            }
+        }
+		result
 	}
 }
 
