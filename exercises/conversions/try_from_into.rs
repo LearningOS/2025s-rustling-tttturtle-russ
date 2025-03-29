@@ -27,7 +27,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
 
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
@@ -41,6 +40,15 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (r,g,b) = tuple;
+        let result = vec![r,g,b].iter().map(|&x| (x >= 0 && x <= 255).then_some(x as u8)).collect::<Option<Vec<_>>>();
+        result.map(|t|
+            Color{
+                red: t[0],
+                green: t[1],
+                blue: t[2]
+            }
+        ).ok_or(IntoColorError::IntConversion)
     }
 }
 
@@ -48,6 +56,19 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let arr: Vec<_> = arr.into_iter()
+            .map(|x| (x >= 0 && x <= 255).then_some(x as u8))
+            .filter(|x| !x.is_none())
+            .map(|x| x.unwrap())
+            .collect();
+        if arr.len() != 3 {
+            return Err(IntoColorError::IntConversion);
+        }
+        Ok(Color{
+            red: arr[0],
+            green: arr[1],
+            blue: arr[2]
+        })
     }
 }
 
@@ -55,6 +76,21 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        let len = slice.iter()
+            .filter(|&&x| x >= 0 && x <= 255)
+            .collect::<Vec<_>>()
+            .len();
+        if len != 3 {
+            return Err(IntoColorError::IntConversion);
+        }
+        Ok(Color{
+            red: slice[0] as u8,
+            green: slice[1] as u8,
+            blue: slice[2] as u8
+        })
     }
 }
 
